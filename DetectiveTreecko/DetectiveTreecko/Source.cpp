@@ -9,7 +9,7 @@ int main() {
 	for (const auto & entry : directory_iterator(path)) {
 		cout << entry.path() << endl;
 	}
-
+	 
 	system("pause");
 	return 0;
 }
