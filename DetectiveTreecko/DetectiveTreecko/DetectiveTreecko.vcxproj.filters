@@ -19,9 +19,4 @@
       <Filter>Archivos de recursos</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="dirent.h">
-      <Filter>Archivos de código fuente</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>
