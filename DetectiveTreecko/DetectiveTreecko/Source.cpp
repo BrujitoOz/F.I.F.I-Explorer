@@ -1,15 +1,11 @@
-#include <iostream>
-#include <filesystem> // investigar. tiene funciones que permite iterar carpetas y archivos, extraer el tamanio de un archivo, etc
-
-using namespace std;
-using namespace std::experimental::filesystem; // libreria propuestra por c++, aun experimental
-
+#include "Controller.h"
+// Por ahora lo que tenemos es la clase AVLTree, el arbol balanceado que hizo el inigualable Canaval
+// la clase fichero que contiene los atributos por los cuales se pueden ordenar los archivos
+// la clase controller para construir los arboles
 int main() {
-	string path = "c:\\"; // la ruta que queremos escanear
-	for (const auto & entry : directory_iterator(path)) {
-		cout << entry.path() << endl;
-	}
-	 
-	system("pause");
+	Controller* c = new Controller("C:\\Games");
+	c->createTrees();
+	c->menu();
+	delete c;
 	return 0;
 }
