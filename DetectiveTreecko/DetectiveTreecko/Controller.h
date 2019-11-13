@@ -1,15 +1,19 @@
 #pragma once
+#include <filesystem> // investigar. tiene funciones que permite iterar carpetas y archivos, extraer el tamanio de un archivo, etc
 #include "AVLTree.h"
 #include "Fichero.h"
+#include <chrono>
 #include <vector>
+#include <iomanip>
 #include <iostream>
-#include <filesystem> // investigar. tiene funciones que permite iterar carpetas y archivos, extraer el tamanio de un archivo, etc
 using namespace std;
 using namespace std::experimental::filesystem; // libreria propuestra por c++, aun experimental
+using namespace std::chrono_literals;
 class Controller { // creamos los arboles por nombre, extension y tamanio
 	AVLTree<Fichero*, string, nullptr> *ficherosPorNombre;
 	AVLTree<Fichero*, string, nullptr> *ficherosPorExtension;
 	AVLTree<Fichero*, long, 0> *ficherosPorTamanio;
+	AVLTree<Fichero*, string, nullptr> *ficherosPorFecha;
 	string pathInicial; // este es el C\\ que le pasan por parametro desde el source
 public:
 	Controller(string pathInicial) { this->pathInicial = pathInicial; }
@@ -24,10 +28,16 @@ public:
 				f->nombre = entry.path().filename().string();
 				f->extension = entry.path().extension().string();
 				f->size = file_size(entry.path());
+
+				auto ftime = last_write_time(entry.path());
+				time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
+
+				f->fecha = asctime(localtime(&cftime));
+
 				ficherosPorNombre->add(f);
 				ficherosPorExtension->add(f);
 				ficherosPorTamanio->add(f);
-				//cout << entry.path() << endl;
+				ficherosPorFecha->add(f);
 			}
 		}
 	}
@@ -41,12 +51,15 @@ public:
 		auto comparableByTam = [](Fichero* f) { return f->size; };
 		ficherosPorTamanio = new AVLTree<Fichero*, long, nullptr>(comparableByTam);
 
+		auto comparableByFecha = [](Fichero* f) { return f->fecha; };
+		ficherosPorFecha = new AVLTree<Fichero*, string, nullptr>(comparableByFecha);
+
 		readDirectory(pathInicial);
 	}
 	void menu() {
 		auto prnt = [](Fichero* f) { cout << f->nombre << " - " << f->size << "\n"; };
 		auto startWith = [](Fichero* f, string startWith) { return f->nombre.find(startWith) == 0; };
-		int option;
+		int option = -1;
 		while (option != 0) {
 			cout << "1. Ordenar Ascendente por Nombre\n" << "2. Ordenar Descendente por Nombres\n" << "3. Buscar por Nombre\n";
 			cin >> option;
@@ -81,8 +94,8 @@ public:
 				break;
 			}
 			system("pause");
+			system("CLS");
 		}
-		//ficherosPorExtension->inorder(prnt);
 		cout << "--------------------==\n";
 	}
 };

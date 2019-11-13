@@ -3,7 +3,7 @@
 // la clase fichero que contiene los atributos por los cuales se pueden ordenar los archivos
 // la clase controller para construir los arboles
 int main() {
-	Controller* c = new Controller("C:\\Games");
+	Controller* c = new Controller("C:\\Test");
 	c->createTrees();
 	c->menu();
 	delete c;

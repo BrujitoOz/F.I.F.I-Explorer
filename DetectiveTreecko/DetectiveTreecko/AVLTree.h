@@ -93,9 +93,9 @@ class AVLTree { // Arbol balanceado que nos dio lord Canaval, lo unico nuevo por
 	}
 	void reversedInorder(Node* node, function<void(T)> proc) {
 		if (node != nullptr) {
-			inorder(node->right, proc);
+			reversedInorder(node->right, proc);
 			proc(node->Elem);
-			inorder(node->left, proc);
+			reversedInorder(node->left, proc);
 		}
 	}
 	int Height(Node* node) { return node == nullptr ? -1 : node->h; }

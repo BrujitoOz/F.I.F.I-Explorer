@@ -7,5 +7,6 @@ public:
 	string nombre;
 	string path;
 	string extension;
+	string fecha;
 	long size;
 };
