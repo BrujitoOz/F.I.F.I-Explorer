@@ -1,4 +1,6 @@
 #pragma once
+//#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+//#include <experimental/filesystem>
 #include <filesystem> // investigar. tiene funciones que permite iterar carpetas y archivos, extraer el tamanio de un archivo, etc
 #include "AVLTree.h"
 #include "Fichero.h"
@@ -56,23 +58,19 @@ public:
 			}
 			else {
 				Fichero *f = new Fichero();
-				f->path = entry.path().string();
-				f->nombre = entry.path().filename().string();
-				f->extension = entry.path().extension().string();
-				f->size = file_size(entry.path());
+				f->SetPath(entry.path().string());
+				f->SetNombre(entry.path().filename().string());
+				f->SetExtension(entry.path().extension().string());
+				f->SetSize(file_size(entry.path()));
 
 				auto ftime = last_write_time(entry.path());
 				time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
+				f->SetFecha(asctime(localtime(&cftime)));
 
-				f->fecha = asctime(localtime(&cftime));
-
-
-
-				string aux = f->fecha.substr(20, 4);
-				string aux2 = f->fecha.substr(4, 3);
-				string aux3 = f->fecha.substr(8, 2);
-
-				f->fecha = Fecha(aux, aux2, aux3);
+				string aux = f->GetFecha().substr(20, 4);
+				string aux2 = f->GetFecha().substr(4, 3);
+				string aux3 = f->GetFecha().substr(8, 2);
+				f->SetFecha(Fecha(aux, aux2, aux3));
 				
 				ficherosPorNombre->add(f);
 				ficherosPorExtension->add(f);
@@ -82,23 +80,23 @@ public:
 		}
 	}
 	void createTrees() {
-		auto comparableByname = [](Fichero* f) { return f->nombre; };
+		auto comparableByname = [](Fichero* f) { return f->GetNombre(); };
 		ficherosPorNombre = new AVLTree<Fichero*, string, nullptr>(comparableByname);
 
-		auto comparableByExt = [](Fichero* f) { return f->extension; };
+		auto comparableByExt = [](Fichero* f) { return f->GetExtension(); };
 		ficherosPorExtension = new AVLTree<Fichero*, string, nullptr>(comparableByExt);
 
-		auto comparableByTam = [](Fichero* f) { return f->size; };
+		auto comparableByTam = [](Fichero* f) { return f->GetSize(); };
 		ficherosPorTamanio = new AVLTree<Fichero*, long, nullptr>(comparableByTam);
 
-		auto comparableByFecha = [](Fichero* f) { return f->fecha; };
+		auto comparableByFecha = [](Fichero* f) { return f->GetFecha(); };
 		ficherosPorFecha = new AVLTree<Fichero*, string, nullptr>(comparableByFecha);
 
 		readDirectory(pathInicial);
 	}
 	void menu() {
-		auto prnt = [](Fichero* f) { cout << f->nombre << " - " << f->size << " - " << f->fecha << "\n"; };
-		auto startWith = [](Fichero* f, string startWith) { return f->nombre.find(startWith) == 0; };
+		auto prnt = [](Fichero* f) { cout << f->GetNombre() << " - " << f->GetSize() << " - " << f->GetFecha() << "\n"; };
+		auto startWith = [](Fichero* f, string startWith) { return f->GetNombre().find(startWith) == 0; };
 		int option = -1;
 		while (option != 0) {
 			cout << "1. Ordenar Ascendente por Nombre\n" << "2. Ordenar Descendente por Nombres\n" << "3. Buscar por Nombre\n";
@@ -120,7 +118,7 @@ public:
 				if (buscarOpcion == 3) {
 					Fichero *f = ficherosPorNombre->find(searchVal);
 					cout << "El Fichero se encuentra en :" << endl;
-					cout << f->path << endl;
+					cout << f->GetPath() << endl;
 				}
 				else if (buscarOpcion == 1) {
 					vector<Fichero*> *result = ficherosPorNombre->findStarWith(searchVal, startWith);
