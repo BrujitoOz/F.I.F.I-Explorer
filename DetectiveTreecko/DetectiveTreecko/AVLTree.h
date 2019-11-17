@@ -70,6 +70,29 @@ class AVLTree { // Arbol balanceado que nos dio lord Canaval, lo unico nuevo por
 			findStarWith(node->right, val, op, list);
 		}
 	}
+	void CompMayor(Node* node, Comparable val, function<bool(T, long)> op, vector<T> *list) {
+		if (node == nullptr) {
+			return;
+		}
+		else if (op(node->Elem, val)) {
+			list->push_back(node->Elem);
+			CompMayor(node->left, val, op, list);
+			CompMayor(node->right, val, op, list);
+		}
+		else if (val < Key(node->Elem)) {
+			CompMayor(node->left, val, op, list);
+		}
+		else {
+			CompMayor(node->right, val, op, list);
+		}
+	}
+	void savearr(Node* node, function<void(T, int)> proc) {
+		if (node != nullptr) {
+			proc(node->Elem);
+			preorder(node->left, proc);
+			preorder(node->right, proc);
+		}
+	}
 	void preorder(Node* node, function<void(T)> proc) {
 		if (node != nullptr) {
 			proc(node->Elem);
@@ -85,6 +108,13 @@ class AVLTree { // Arbol balanceado que nos dio lord Canaval, lo unico nuevo por
 		}
 	}
 	void inorder(Node* node, function<void(T)> proc) {
+		if (node != nullptr) {
+			inorder(node->left, proc);
+			proc(node->Elem);
+			inorder(node->right, proc);
+		}
+	}
+	void inorder2(Node* node, function<void(T, int, int )> proc) {
 		if (node != nullptr) {
 			inorder(node->left, proc);
 			proc(node->Elem);
@@ -194,8 +224,14 @@ public:
 		findStarWith(root, val, op, result);
 		return result;
 	}
+	vector<T>* CompMayor(Comparable val, function<bool(T, Comparable)> op) { // buscar que retorna primera coincidencia, falta buscar que retorne lista de coincidencias
+		vector<T> *result2 = new vector<T>();
+		CompMayor(root, val, op, result2);
+		return result2;
+	}
 	void preorder(function<void(T)> proc) { preorder(root, proc); }
 	void postorder(function<void(T)> proc) { postorder(root, proc); }
 	void inorder(function<void(T)> proc) { inorder(root, proc); }
+	void inorder2(function<long(T, int, int)> proc) { inorder(root, proc); }
 	void reversedInorder(function<void(T)> proc) { reversedInorder(root, proc); }
 };
