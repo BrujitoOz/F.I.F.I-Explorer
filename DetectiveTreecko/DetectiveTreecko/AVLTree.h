@@ -70,6 +70,18 @@ class AVLTree { // Arbol balanceado que nos dio lord Canaval, lo unico nuevo por
 			findStarWith(node->right, val, op, list);
 		}
 	}
+
+	void findContain(Node* node, Comparable val, function<bool(T, string)> op, vector<T>* list) {
+		if (node == nullptr) {
+			return;
+		}
+		else if (op(node->Elem, val)) {
+			list->push_back(node->Elem);
+		}
+		findContain(node->left, val, op, list);
+		findContain(node->right, val, op, list);
+	}
+
 	void CompMayor(Node* node, Comparable val, function<bool(T, long)> op, vector<T> *list) {
 		if (node == nullptr) {
 			return;
@@ -222,6 +234,11 @@ public:
 	vector<T>* findStarWith(Comparable val, function<bool(T, Comparable)> op) { // buscar que retorna primera coincidencia, falta buscar que retorne lista de coincidencias
 		vector<T> *result = new vector<T>();
 		findStarWith(root, val, op, result);
+		return result;
+	}
+	vector<T>* findContain(Comparable val, function<bool(T, Comparable)> op) { // buscar que contenga un cadena dentro del nombre
+		vector<T>* result = new vector<T>();
+		findContain(root, val, op, result);
 		return result;
 	}
 	vector<T>* CompMayor(Comparable val, function<bool(T, Comparable)> op) { // buscar que retorna primera coincidencia, falta buscar que retorne lista de coincidencias

@@ -1,4 +1,6 @@
 #pragma once
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#include <experimental/filesystem>
 #include <filesystem> // investigar. tiene funciones que permite iterar carpetas y archivos, extraer el tamanio de un archivo, etc
 #include "AVLTree.h"
 #include "Fichero.h"
@@ -14,6 +16,7 @@ class Controller { // creamos los arboles por nombre, extension y tamanio
 	AVLTree<Fichero*, string, nullptr> *ficherosPorExtension;
 	AVLTree<Fichero*, long, 0> *ficherosPorTamanio;
 	AVLTree<Fichero*, string, nullptr> *ficherosPorFecha;
+	AVLTree<Fichero*, string, nullptr> *ficherosPorNombreal;
 	string pathInicial; // este es el C\\ que le pasan por parametro desde el source
 public:
 
@@ -60,6 +63,30 @@ public:
 				f->nombre = entry.path().filename().string();
 				f->extension = entry.path().extension().string();
 				f->size = file_size(entry.path());
+				f->nombreal = entry.path().filename().string();
+				
+
+				int n = f->nombreal.length();
+				
+				while (1)
+				{
+					f->nombreal.erase(n - 1);
+					n = f->nombreal.length();
+
+					if (f->nombreal.substr(n - 1, 1) == ".") {
+
+						f->nombreal.erase(n - 1);
+						break;
+
+					}
+				}
+
+
+				int t = f->nombreal.length();
+				for (int i = 0; i < t / 2; i++)
+					swap(f->nombreal[i], f->nombreal[t - i - 1]);
+
+
 
 				auto ftime = last_write_time(entry.path());
 				time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
@@ -74,14 +101,17 @@ public:
 
 				f->fecha = Fecha(aux, aux2, aux3);
 				
-				ficherosPorNombre->add(f);
+				
 				ficherosPorExtension->add(f);
 				ficherosPorTamanio->add(f);
 				ficherosPorFecha->add(f);
+				ficherosPorNombre->add(f);
+				ficherosPorNombreal->add(f);
 			}
 		}
 	}
 	void createTrees() {
+
 		auto comparableByname = [](Fichero* f) { return f->nombre; };
 		ficherosPorNombre = new AVLTree<Fichero*, string, nullptr>(comparableByname);
 
@@ -94,13 +124,18 @@ public:
 		auto comparableByFecha = [](Fichero* f) { return f->fecha; };
 		ficherosPorFecha = new AVLTree<Fichero*, string, nullptr>(comparableByFecha);
 
+		auto comparableBynameal = [](Fichero* f) {return f->nombreal; };
+		ficherosPorNombreal = new AVLTree<Fichero*, string, nullptr>(comparableBynameal);
+
 		readDirectory(pathInicial);
 	}
 	void menu() {
 		auto prnt = [](Fichero* f) { cout << f->nombre << " - " << f->size << " - " << f->fecha << "\n"; };	
 		auto startWith = [](Fichero* f, string startWith) { return f->nombre.find(startWith) == 0; };
+		auto finitationWith = [](Fichero* f, string startWith) { return f->nombreal.find(startWith) == 0; };
 		auto FunMay = [](Fichero* f, long eux) {    return f->size > eux; };
 		auto FunMen = [](Fichero* f, long eux) {    return f->size < eux; };
+		auto contain = [](Fichero* f, string s) { return f->nombre.find(s) != -1; };
 
 		int option = -1;
 		while (option != 0) {
@@ -109,14 +144,14 @@ public:
 			string searchVal;
 			switch (option) {
 			case 1:
-				ficherosPorFecha->inorder(prnt);
+				ficherosPorNombreal->inorder(prnt);
 				break;
 			case 2:
 				ficherosPorFecha->reversedInorder(prnt);
 				break;
 			case 3:
 				int buscarOpcion;
-				cout << "1. Inicia con:\n" << "2. Termina con:\n" << "3. Igual a:\n" << "4. Mayor a\n" << "5. Menor a\n";
+				cout << "1. Inicia con:\n" << "2. Termina con:\n" << "3. Igual a:\n" << "4. Contiene :\n";
 				cin >> buscarOpcion;
 				cout << "Ingrese la valor a buscar \n";
 				cin >> searchVal;
@@ -132,6 +167,27 @@ public:
 					for (int i = 0; i < r1.size(); i++) {
 						prnt(r1[i]);
 					}		
+				}
+				else if (buscarOpcion == 2) {
+
+					int t = searchVal.length();
+					for (int i = 0; i < t / 2; i++)
+						swap(searchVal[i], searchVal[t - i - 1]);
+
+					vector<Fichero*> *result3 = ficherosPorNombreal->findStarWith(searchVal, finitationWith);
+					cout << "Cantidad de Ficheros encontrados:" << result3->size() << endl;
+					vector<Fichero*> r2 = *result3;
+					for (int i = 0; i < r2.size(); i++) {
+						prnt(r2[i]);
+					}
+				}
+				else if (buscarOpcion ==4) {
+					vector<Fichero*>* result = ficherosPorNombre->findContain(searchVal, contain);
+					cout << "Cantidad de Ficheros encontrados:" << result->size() << endl;
+					vector<Fichero*> r1 = *result;
+					for (int i = 0; i < r1.size(); i++) {
+						prnt(r1[i]);
+					}
 				}
 				
 
