@@ -19,7 +19,7 @@ int main() {
 		c = new Controller(escribeesta);
 	}
 	delete opcion;*/
-	c = new Controller("C:\\test");
+	c = new Controller("D:\\pokemon hackroom");
 	c->createTrees();
 	c->menu();
 	delete c;

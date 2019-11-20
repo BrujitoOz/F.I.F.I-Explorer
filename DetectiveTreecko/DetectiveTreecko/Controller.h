@@ -66,14 +66,21 @@ public:
 				f->SetExtension(f->GetExtension().erase(0,1));
 
 				int n1 = f->GetNombreal().length();
-				while (1) {
-					f->SetNombreal(f->GetNombreal().erase(n1-1));
+				string x = f->GetNombreal();
+				/*while (1) {
+					if (n1 > 3)f->SetNombreal(f->GetNombreal().erase(n1 - 1));
 					n1 = f->GetNombreal().length();
 					if (f->GetNombreal().substr(n1 - 1, 1) == ".") {
 						f->SetNombreal(f->GetNombreal().erase(n1 - 1));
 						break;
 					}
-				}
+					if (f->GetNombreal().length()< 2 ) 
+					{
+						f->SetNombreal(x);
+						break;
+					}
+				
+				}*/
 				int t1 = f->GetNombreal().length();
 				string help1 = f->GetNombreal();
 				string help2 = f->GetNombreal();
@@ -299,10 +306,10 @@ public:
 				cout << "1. Ascendente\n" << "2. Descendente\n"; cin >> opc2;
 				if (opc == 1) {
 					if (opc2 == 1) {
-						ficherosPorNombreal->inorder(prnt); // ojo
+						ficherosPorNombre->inorder(prnt); // ojo
 					}
 					else {
-						ficherosPorNombreal->reversedInorder(prnt);
+						ficherosPorNombre->reversedInorder(prnt);
 					}
 				}
 				else if (opc == 2) {
