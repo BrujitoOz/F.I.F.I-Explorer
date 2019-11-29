@@ -1,7 +1,4 @@
 #include "Controller.h"
-// Por ahora lo que tenemos es la clase AVLTree, el arbol balanceado que hizo el inigualable Canaval
-// la clase fichero que contiene los atributos por los cuales se pueden ordenar los archivos
-// la clase controller para construir los arboles
 int main() {
 	Controller* c;
 	/*int* opcion = new int;
@@ -19,7 +16,7 @@ int main() {
 		c = new Controller(escribeesta);
 	}
 	delete opcion;*/
-	c = new Controller("D:\\pokemon hackroom");
+	c = new Controller("C:\\Program Files (x86)");
 	c->createTrees();
 	c->menu();
 	delete c;
