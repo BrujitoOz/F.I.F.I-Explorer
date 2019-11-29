@@ -1,12 +1,15 @@
 #pragma once
 #include <string>
+#include <cstdint>
+#include <stdint.h>
+typedef long long int li;
 using namespace std;
 class Fichero {
 	string nombre;
 	string path;
 	string extension;
 	string fecha;
-	long size;
+	li size;
 	string nombreal;
 	string extensional;
 public:
@@ -18,8 +21,8 @@ public:
 	string GetExtension() { return extension; }
 	void SetFecha(string fecha) { this->fecha = fecha; }
 	string GetFecha() { return fecha; }
-	void SetSize(long size) { this->size = size; }
-	long GetSize() { return size; }
+	void SetSize(li size) { this->size = size; }
+	li GetSize() { return size; }
 	void SetNombreal(string nombreal) { this->nombreal = nombreal; }
 	string GetNombreal() { return nombreal; }
 	void SetExtensional(string extensional) { this->extensional = extensional; }
