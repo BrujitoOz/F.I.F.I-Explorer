@@ -1,25 +1,24 @@
 #pragma once
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#define _CRT_SECURE_NO_WARNINGS
 #include <experimental/filesystem>
-#include <filesystem> // investigar. tiene funciones que permite iterar carpetas y archivos, extraer el tamanio de un archivo, etc
+#include <filesystem>
 #include "AVLTree.h"
 #include "Fichero.h"
 #include <iostream>
-#include <chrono>
 #include <iomanip>
+#include <chrono>
 using namespace std::experimental::filesystem;
 using namespace std::chrono_literals;
 class Controller {
 	AVLTree<Fichero*, string, nullptr> *ficherosPorNombre;
 	AVLTree<Fichero*, string, nullptr> *ficherosPorExtension;
-	AVLTree<Fichero*, li, 0> *ficherosPorTamanio;
+	AVLTree<Fichero*, double, 0> *ficherosPorTamanio;
 	AVLTree<Fichero*, string, nullptr> *ficherosPorFecha;
 	AVLTree<Fichero*, string, nullptr> *ficherosPorNombreal;
 	AVLTree<Fichero*, string, nullptr> *ficherosPorExtensional;
-
 	string pathInicial;
-	string Fecha(string aux, string aux2, string aux3)
-	{
+	string Fecha(string aux, string aux2, string aux3) {
 		if (aux2 == "Jan") aux2 = "01";
 		else if (aux2 == "Feb")  aux2 = "02";
 		else if (aux2 == "Mar")  aux2 = "03";
@@ -46,6 +45,15 @@ class Controller {
 		string devolver = aux + '\\' + aux2 + '\\' + aux3;
 		return devolver;
 	}
+	void MostrarCantidad(vector<Fichero*>* aux, function<void(Fichero*)> prnt) {
+		cout << "Cantidad de Ficheros encontrados: " << aux->size() << endl;
+		vector<Fichero*> r1 = *aux;
+		int64_t n = r1.size();
+		for (int64_t i = 0; i < n; i++) {
+			prnt(r1[i]); 
+		}
+	}
+	
 public:
 	Controller(string pathInicial) { this->pathInicial = pathInicial; }
 	void readDirectory(string path) {
@@ -61,30 +69,28 @@ public:
 				f->SetSize(file_size(entry.path())*0.001);
 				f->SetNombreal(entry.path().filename().string());
 				f->SetExtensional(entry.path().extension().string());
-
-				
+	
 				f->SetExtension(f->GetExtension().erase(0,1));
 
-				uint n1 = f->GetNombreal().length();
-				string x = f->GetNombreal();
-				uint xpos = x.find(".");
-				if (xpos != -1) {
-					x.erase(xpos, n1-1);
+				size_t lenght1 = f->GetNombreal().length();
+				string nombrealaux = f->GetNombreal();
+				size_t pointpos = nombrealaux.find(".");
+				if (pointpos != -1) {
+					nombrealaux.erase(pointpos, lenght1-1);
 				}
-				f->SetNombreal(x);
+				f->SetNombreal(nombrealaux);
 
-				string help1 = f->GetNombreal();
-				reverse(help1.begin(), help1.end());
-				f->SetNombreal(help1);
+				string toswap1 = f->GetNombreal();
+				reverse(toswap1.begin(), toswap1.end());
+				f->SetNombreal(toswap1);
 
-				string help3 = f->GetExtensional();
-				reverse(help3.begin(), help3.end());
-				f->SetExtensional(help3);
+				string toswap2 = f->GetExtensional();
+				reverse(toswap2.begin(), toswap2.end());
+				f->SetExtensional(toswap2);
 
 				auto ftime = last_write_time(entry.path());
 				time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
 				f->SetFecha(asctime(localtime(&cftime)));
-
 				string aux = f->GetFecha().substr(20, 4);
 				string aux2 = f->GetFecha().substr(4, 3);
 				string aux3 = f->GetFecha().substr(8, 2);
@@ -108,7 +114,7 @@ public:
 		ficherosPorExtension = new AVLTree<Fichero*, string, nullptr>(comparableByExt);
 
 		auto comparableByTam = [](Fichero* f) { return f->GetSize(); };
-		ficherosPorTamanio = new AVLTree<Fichero*, li, 0>(comparableByTam);
+		ficherosPorTamanio = new AVLTree<Fichero*, double, 0>(comparableByTam);
 
 		auto comparableByFecha = [](Fichero* f) { return f->GetFecha(); };
 		ficherosPorFecha = new AVLTree<Fichero*, string, nullptr>(comparableByFecha);
@@ -122,26 +128,21 @@ public:
 		readDirectory(pathInicial);
 	}
 	void menu() {
-		auto prnt = [](Fichero* f) { cout << f->GetNombre() << " - " << f->GetSize() << "KB - " << f->GetFecha() << "test "<< f->GetNombreal() <<"\n"; };
+		auto prnt = [](Fichero* f) { cout << f->GetNombre() << " - " << f->GetSize() << "KB - " << f->GetFecha() <<"\n"; };
 		auto startWith = [](Fichero* f, string startWith) { return f->GetNombre().find(startWith) == 0; };
 		auto startWith2 = [](Fichero* f, string startWith2) { return f->GetExtension().find(startWith2) == 0; };
 		auto finitationWith = [](Fichero* f, string startWith) { return f->GetNombreal().find(startWith) == 0; };
 		auto finitationWith2 = [](Fichero* f, string startWith2) { return f->GetExtensional().find(startWith2) == 0; };
-		auto FunMay = [](Fichero* f, li eux) { return f->GetSize() > eux; };
-		auto FunMen = [](Fichero* f, li eux) { return f->GetSize() < eux; };
-		auto FunIgu = [](Fichero* f, li eux) { return f->GetSize() == eux; };
-		
-		
-		
+		auto FunMay = [](Fichero* f, double eux) { return f->GetSize() > eux; };
+		auto FunMen = [](Fichero* f, double eux) { return f->GetSize() < eux; };
+		auto FunIgu = [](Fichero* f, double eux) { return f->GetSize() == eux; };
+				
 		auto FunIguDia = [](Fichero* f, string eux) { return f->GetFecha().substr(8,9) == eux; };
 		auto FunIguMes = [](Fichero* f, string eux) { return f->GetFecha().substr(5,2) == eux; };
-		auto FunIguAÃ±o = [](Fichero* f, string eux) { return f->GetFecha().substr(0,4) == eux; };
-
-		
+		auto FunIguAño = [](Fichero* f, string eux) { return f->GetFecha().substr(0,4) == eux; };
 		
 		auto contain = [](Fichero* f, string s) { return f->GetNombre().find(s) != -1; };
 		auto contain2 = [](Fichero* f, string s) { return f->GetExtension().find(s) != -1; };
-
 
 		int option = -1;
 		while (option != 0) {
@@ -159,32 +160,17 @@ public:
 				cout << "1. Inicia con:\n" << "2. Termina con:\n" << "3. Contiene :\n"; cin >> buscarOpcion;
 				cout << "Ingrese la valor a buscar \n"; cin >> searchVal;
 				if (buscarOpcion == 1) {
-					vector<Fichero*> *result = ficherosPorNombre->findStarWith(searchVal, startWith);
-					cout << "Cantidad de Ficheros encontrados:" << result->size() << endl;
-					vector<Fichero*> r1 = *result;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					vector<Fichero*>* result = ficherosPorNombre->findStarWith(searchVal, startWith);
+					MostrarCantidad(result, prnt);
 				}
 				else if (buscarOpcion == 2) {
-					int t = searchVal.length();
-					for (li i = 0; i < t / 2; i++) {
-						swap(searchVal[i], searchVal[t - i - 1]);
-					}
-					vector<Fichero*> *result3 = ficherosPorNombreal->findStarWith(searchVal, finitationWith);
-					cout << "Cantidad de Ficheros encontrados:" << result3->size() << endl;
-					vector<Fichero*> r2 = *result3;
-					for (li i = 0; i < r2.size(); i++) {
-						prnt(r2[i]);
-					}
+					reverse(searchVal.begin(), searchVal.end());
+					vector<Fichero*>* result = ficherosPorNombreal->findStarWith(searchVal, finitationWith);
+					MostrarCantidad(result, prnt);
 				}
 				else if (buscarOpcion == 3) {
 					vector<Fichero*>* result = ficherosPorNombre->findContain(searchVal, contain);
-					cout << "Cantidad de Ficheros encontrados:" << result->size() << endl;
-					vector<Fichero*> r1 = *result;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					MostrarCantidad(result, prnt);
 				}
 				break;
 			case 2:
@@ -194,28 +180,16 @@ public:
 				cout << "Ingrese la valor a buscar \n";
 				cin >> eux;
 				if (buscarOp == 1) {
-					vector<Fichero*> *result2 = ficherosPorTamanio->Comp(eux, FunMay);
-					cout << "Cantidad de Ficheros encontrados:" << result2->size() << endl;
-					vector<Fichero*> r1 = *result2;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					vector<Fichero*>* result = ficherosPorTamanio->Comp(eux, FunMay);
+					MostrarCantidad(result, prnt);
 				}
 				else if(buscarOp == 2) {
-					vector<Fichero*> *result2 = ficherosPorTamanio->Comp(eux, FunMen);
-					cout << "Cantidad de Ficheros encontrados:" << result2->size() << endl;
-					vector<Fichero*> r1 = *result2;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					vector<Fichero*>* result = ficherosPorTamanio->Comp(eux, FunMen);
+					MostrarCantidad(result, prnt);
 				}
 				else if (buscarOp == 3) {
-					vector<Fichero*> *result2 = ficherosPorTamanio->Comp(eux, FunIgu);
-					cout << "Cantidad de Ficheros encontrados:" << result2->size() << endl;
-					vector<Fichero*> r1 = *result2;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					vector<Fichero*> *result = ficherosPorTamanio->Comp(eux, FunIgu);
+					MostrarCantidad(result, prnt);
 				}
 				break;
 			case 3:
@@ -223,32 +197,17 @@ public:
 				cout << "1. Inicia con:\n" << "2. Termina con:\n" << "3. Contiene :\n"; cin >> buscarOpcion2;
 				cout << "Ingrese la valor a buscar \n"; cin >> searchVal2;
 				if (buscarOpcion2 == 1) {
-					vector<Fichero*> *result = ficherosPorExtension->findStarWith(searchVal2, startWith2);
-					cout << "Cantidad de Ficheros encontrados:" << result->size() << endl;
-					vector<Fichero*> r1 = *result;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					vector<Fichero*>* result = ficherosPorExtension->findStarWith(searchVal2, startWith2);
+					MostrarCantidad(result, prnt);
 				}
 				else if (buscarOpcion2 == 2) {
-					int t = searchVal2.length();
-					for (li i = 0; i < t / 2; i++) {
-						swap(searchVal2[i], searchVal2[t - i - 1]);
-					}
-					vector<Fichero*> *result3 = ficherosPorExtensional->findStarWith(searchVal2, finitationWith2);
-					cout << "Cantidad de Ficheros encontrados:" << result3->size() << endl;
-					vector<Fichero*> r2 = *result3;
-					for (li i = 0; i < r2.size(); i++) {
-						prnt(r2[i]);
-					}
+					reverse(searchVal2.begin(), searchVal2.end());
+					vector<Fichero*>* result = ficherosPorExtensional->findStarWith(searchVal2, finitationWith2);
+					MostrarCantidad(result, prnt);
 				}
 				else if (buscarOpcion2 == 3) {
 					vector<Fichero*>* result = ficherosPorExtension->findContain(searchVal2, contain2);
-					cout << "Cantidad de Ficheros encontrados:" << result->size() << endl;
-					vector<Fichero*> r1 = *result;
-					for (li i = 0; i < r1.size(); i++) {
-						prnt(r1[i]);
-					}
+					MostrarCantidad(result, prnt);
 				}
 				break;
 			case 4:
@@ -256,30 +215,18 @@ public:
 				cout << "1. Dia:\n" << "2. Mes:\n" << "3. Anio:\n"; cin >> elegir;
 				if (elegir == 1) {
 					cout << "Ingresa el dia en numero de dos digitos: "; cin >> theday;
-					vector<Fichero*> *testeoesto = ficherosPorFecha->Comp2(theday, FunIguDia);
-					cout << "Cantidad de Ficheros encontrados:" << testeoesto->size() << endl;
-					vector<Fichero*> vu = *testeoesto;
-					for (li i = 0; i < vu.size(); i++) {
-						prnt(vu[i]);
-					}
+					vector<Fichero*> *result = ficherosPorFecha->Comp2(theday, FunIguDia);
+					MostrarCantidad(result, prnt);
 				}
 				else if (elegir == 2) {
 					cout << "Ingresa el mes en numero de dos digitos: "; cin >> themonth;
-					vector<Fichero*> *testeoesto = ficherosPorFecha->Comp2(themonth, FunIguMes);
-					cout << "Cantidad de Ficheros encontrados:" << testeoesto->size() << endl;
-					vector<Fichero*> vu = *testeoesto;
-					for (li i = 0; i < vu.size(); i++) {
-						prnt(vu[i]);
-					}
+					vector<Fichero*> *result = ficherosPorFecha->Comp2(themonth, FunIguMes);
+					MostrarCantidad(result, prnt);
 				}
 				else if (elegir == 3) {
 					cout << "Ingresa el anio: "; cin >> theyear;
-					vector<Fichero*> *testeoesto = ficherosPorFecha->Comp2(theyear, FunIguAÃ±o);
-					cout << "Cantidad de Ficheros encontrados:" << testeoesto->size() << endl;
-					vector<Fichero*> vu = *testeoesto;
-					for (li i = 0; i < vu.size(); i++) {
-						prnt(vu[i]);
-					}
+					vector<Fichero*> *result = ficherosPorFecha->Comp2(theyear, FunIguAño);
+					MostrarCantidad(result, prnt);
 				}
 				break;
 			case 5:

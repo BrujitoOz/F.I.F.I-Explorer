@@ -1,10 +1,8 @@
 #pragma once
+#define max(a,b) (a > b ? a : b) 
 #include <functional>
 #include <vector>
-#include <string>
-#include <cstdint>
-#include <stdint.h>
-#define max(a,b) (a > b ? a : b) 
+#include <string> 
 using namespace std;
 typedef unsigned int uint;
 typedef long long int li;
@@ -15,7 +13,7 @@ struct Node {
 	li n;
 	Node<T>* left;
 	Node<T>* right;
-	Node(T Elem) : Elem(Elem), left(nullptr), right(nullptr), h(0), n(1) {}
+	Node(T Elem) : Elem(Elem), h(0), n(1), left(nullptr), right(nullptr) {}
 };
 template<typename T, typename Comparable = T, T NONE = 0>
 class AVLTree {
@@ -27,6 +25,48 @@ class AVLTree {
 			Destroy(node->right);
 			delete node;
 		}
+	}
+	li Height(Node<T>* node) { return node == nullptr ? -1 : node->h; }
+	li Lenght(Node<T>* node) { return node == nullptr ? 0 : node->n; }
+	void UpdateHeight(Node<T>* node) {
+		node->h = 1 + max(Height(node->left), Height(node->right));
+		node->n = 1 + Lenght(node->left) + Lenght(node->right);
+	}
+	Node<T>* RotLeft(Node<T>* node) {
+		Node<T>* NodeAux = node->right;
+		node->right = NodeAux->left;
+		NodeAux->left = node;
+		UpdateHeight(NodeAux->left);
+		UpdateHeight(NodeAux);
+		return NodeAux;
+	}
+	Node<T>* RotRight(Node<T>* node) {
+		Node<T>* NodeAux = node->left;
+		node->left = NodeAux->right;
+		NodeAux->right = node;
+		UpdateHeight(NodeAux->right);
+		UpdateHeight(NodeAux);
+		return NodeAux;
+	}
+	Node<T>* Balance(Node<T>* node) {
+		li hl = Height(node->left);
+		li hr = Height(node->right);
+		if (hl - hr > 1) {
+			if (Height(node->left->right) > Height(node->left->left)) {
+				node->left = RotLeft(node->left);
+			}
+			node = RotRight(node);
+		}
+		else if (hl - hr < -1) {
+			if (Height(node->right->left) > Height(node->right->right)) {
+				node->right = RotRight(node->right);
+			}
+			node = RotLeft(node);
+		}
+		else {
+			UpdateHeight(node);
+		}
+		return node;
 	}
 	Node<T>* Add(Node<T>* node, T Elem) {
 		if (node == nullptr) {
@@ -83,7 +123,7 @@ class AVLTree {
 		findContain(node->left, val, op, list);
 		findContain(node->right, val, op, list);
 	}
-	void Comp(Node<T>* node, Comparable val, function<bool(T, li)> op, vector<T> *list) {
+	void Comp(Node<T>* node, Comparable val, function<bool(T, double)> op, vector<T> *list) {
 		if (node == nullptr) {
 			return;
 		}
@@ -142,48 +182,6 @@ class AVLTree {
 			proc(node->Elem);
 			reversedInorder(node->left, proc);
 		}
-	}
-	li Height(Node<T>* node) { return node == nullptr ? -1 : node->h; }
-	li Lenght(Node<T>* node) { return node == nullptr ? 0 : node->n; }
-	void UpdateHeight(Node<T>* node) {
-		node->h = 1 + max(Height(node->left), Height(node->right));
-		node->n = 1 + Lenght(node->left) + Lenght(node->right);
-	}
-	Node<T>* RotLeft(Node<T>* node) {
-		Node<T>* NodeAux = node->right;
-		node->right = NodeAux->left;
-		NodeAux->left = node;
-		UpdateHeight(NodeAux->left);
-		UpdateHeight(NodeAux);
-		return NodeAux;
-	}
-	Node<T>* RotRight(Node<T>* node) {
-		Node<T>* NodeAux = node->left;
-		node->left = NodeAux->right;
-		NodeAux->right = node;
-		UpdateHeight(NodeAux->right);
-		UpdateHeight(NodeAux);
-		return NodeAux;
-	}
-	Node<T>* Balance(Node<T>* node) {
-		li hl = Height(node->left);
-		li hr = Height(node->right);
-		if (hl - hr > 1) {
-			if (Height(node->left->right) > Height(node->left->left)) {
-				node->left = RotLeft(node->left);
-			}
-			node = RotRight(node);
-		}
-		else if (hl - hr < -1) {
-			if (Height(node->right->left) > Height(node->right->right)) {
-				node->right = RotRight(node->right);
-			}
-			node = RotLeft(node);
-		}
-		else {
-			UpdateHeight(node);
-		}
-		return node;
 	}
 public:
 	AVLTree(function<Comparable(T)> Key = [](T a) {return a; }) : root(nullptr), Key(Key) {}

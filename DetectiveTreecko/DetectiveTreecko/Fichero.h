@@ -9,9 +9,9 @@ class Fichero {
 	string path;
 	string extension;
 	string fecha;
-	li size;
+	double size;
 	string nombreal;
-	string extensional;
+	string extensional; 
 public:
 	void SetNombre(string nombre) { this->nombre = nombre; }
 	string GetNombre() { return nombre; }
@@ -21,11 +21,10 @@ public:
 	string GetExtension() { return extension; }
 	void SetFecha(string fecha) { this->fecha = fecha; }
 	string GetFecha() { return fecha; }
-	void SetSize(li size) { this->size = size; }
-	li GetSize() { return size; }
+	void SetSize(double size) { this->size = size; }
+	double GetSize() { return size; }
 	void SetNombreal(string nombreal) { this->nombreal = nombreal; }
 	string GetNombreal() { return nombreal; }
 	void SetExtensional(string extensional) { this->extensional = extensional; }
 	string GetExtensional() { return extensional; }
-	
 };
