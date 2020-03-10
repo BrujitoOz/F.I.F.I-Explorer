@@ -236,7 +236,6 @@ public:
 			NodeAux->Elem = NodeAux2->Elem;
 			delete NodeAux2;
 		}
-		delete NodeAux;
 		return true;
 	}
 	vector<T>* findStarWith(Comparable val, function<bool(T, Comparable)> op) {
